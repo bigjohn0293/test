@@ -1,3 +1,5 @@
+]]
+
 local SimpleLib = {}
 
 -->>: SERVICES
