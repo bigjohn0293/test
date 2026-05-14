@@ -1,5 +1,3 @@
-loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/AlexR32/Parvus/main/Loader.lua"))("Parvus hitting p!")
-
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.GameId ~= 0
 
