@@ -1,5 +1,3 @@
-loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/AlexR32/Parvus/main/Loader.lua"))("Parvus hitting p!")
-
 repeat task.wait() until game.IsLoaded
 repeat task.wait() until game.GameId ~= 0
 
@@ -36,13 +34,12 @@ local function GetGameInfo()
             return Info
         end
     end
-
     return Parvus.Games.Universal
 end
 
 getgenv().Parvus = {
     Source = "https://raw.githubusercontent.com/AlexR32/Parvus/" .. Branch .. "/",
-
+    Utilities = {},
     Games = {
         ["Universal" ] = { Name = "Universal",                  Script = "Universal"  },
         ["1168263273"] = { Name = "Bad Business",               Script = "Games/BB"   },
@@ -57,27 +54,34 @@ getgenv().Parvus = {
     }
 }
 
-Parvus.Utilities = LoadScript("Utilities/Main") or {}
-Parvus.Utilities.UI = LoadScript("Utilities/UI") or { Push = function() end }
-Parvus.Utilities.Physics = LoadScript("Utilities/Physics") or {}
-Parvus.Utilities.Drawing = LoadScript("Utilities/Drawing") or {}
+-- Load utilities safely
+local mainSuccess, mainResult = pcall(LoadScript, "Utilities/Main")
+Parvus.Utilities = mainSuccess and mainResult or {}
+
+local uiSuccess, uiResult = pcall(LoadScript, "Utilities/UI")
+Parvus.Utilities.UI = uiSuccess and uiResult or { Push = function() end }
+
+pcall(LoadScript, "Utilities/Physics")
+pcall(LoadScript, "Utilities/Drawing")
 
 Parvus.Cursor = GetFile("Utilities/ArrowCursor.png")
 Parvus.Loadstring = GetFile("Utilities/Loadstring")
-Parvus.Loadstring = Parvus.Loadstring:format(
-    Parvus.Source, Branch, NotificationTime, tostring(IsLocal)
-)
+if Parvus.Loadstring then
+    Parvus.Loadstring = Parvus.Loadstring:format(
+        Parvus.Source, Branch, NotificationTime, tostring(IsLocal)
+    )
+end
 
-LocalPlayer.OnTeleport:Connect(function(State)
-    if State == Enum.TeleportState.InProgress then
-        if QueueOnTeleport then
+if LocalPlayer.OnTeleport and QueueOnTeleport then
+    LocalPlayer.OnTeleport:Connect(function(State)
+        if State == Enum.TeleportState.InProgress and Parvus.Loadstring then
             QueueOnTeleport(Parvus.Loadstring)
         end
-    end
-end)
+    end)
+end
 
 Parvus.Game = GetGameInfo()
-LoadScript(Parvus.Game.Script)
+pcall(LoadScript, Parvus.Game.Script)
 Parvus.Loaded = true
 
 Parvus.Utilities.UI:Push({
